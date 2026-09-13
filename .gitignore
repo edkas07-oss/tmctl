@@ -1,0 +1,31 @@
+# Binaries
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+tmctl
+
+# Test artifacts & logs
+*.out
+*.test
+*.prof
+*.tmp
+*.log
+coverage.html
+
+# IDE & OS files
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*~
+
+# Temporary Secrets
+*.key
+*.pem
+*.p12
+*.pfx
+.env
+*.env

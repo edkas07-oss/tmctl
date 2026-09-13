@@ -1,0 +1,22 @@
+# Contoh konfigurasi kustom untuk tmctl.
+# Salin berkas ini ke CONFIG jika ingin menyesuaikan konfigurasi lokal / produksi.
+
+PLATFORM_NAME="tomcat-monitoring"
+NETWORK_NAME="devops-lab"
+
+# Container Engine Socket Configurations
+# CONTAINER_ENGINE="podman" # atau "docker"
+# SOCKET_PATH="/run/user/1000/podman/podman.sock" # Linux Podman rootless
+# SOCKET_PATH="/var/run/docker.sock"             # Linux Docker daemon
+# SOCKET_PATH="//./pipe/docker_engine"           # Windows Named Pipe
+
+# Diagnostic Service REST Endpoint
+DIAGNOSTIC_URL="https://localhost:8443"
+BEARER_TOKEN="test-token-12345"
+
+# Container Registry Enterprise
+REGISTRY_URL="localhost"
+REGISTRY_NAMESPACE=""
+REGISTRY_TLS_VERIFY="true"
+IMAGE_PULL_POLICY="IfNotPresent"
+REGISTRY_AUTH_FILE=""

@@ -1,0 +1,40 @@
+# Metadata non-secret deklaratif untuk tmctl (Unified Cross-Platform CLI).
+# File ini mendefinisikan konfigurasi default dan baseline integrasi stack.
+
+PLATFORM_NAME="tomcat-monitoring"
+NETWORK_NAME="devops-lab"
+
+# Container Engine Socket Configurations
+CONTAINER_ENGINE="${CONTAINER_ENGINE:-}"
+SOCKET_PATH="${SOCKET_PATH:-}"
+
+# Diagnostic Service REST Endpoint
+DIAGNOSTIC_URL="${DIAGNOSTIC_URL:-https://localhost:8443}"
+BEARER_TOKEN="${BEARER_TOKEN:-test-token-12345}"
+
+# Container Registry Integration Defaults
+REGISTRY_URL="${REGISTRY_URL:-localhost}"
+REGISTRY_NAMESPACE="${REGISTRY_NAMESPACE:-}"
+REGISTRY_TLS_VERIFY="${REGISTRY_TLS_VERIFY:-true}"
+IMAGE_PULL_POLICY="${IMAGE_PULL_POLICY:-IfNotPresent}"
+REGISTRY_AUTH_FILE="${REGISTRY_AUTH_FILE:-}"
+
+# Workload Ports Baseline
+TOMCAT_HTTP_PORT=8083
+TOMCAT_JMX_PORT=9404
+PROMETHEUS_PORT=9090
+ALERTMANAGER_PORT=9093
+DIAGNOSTIC_PORT=8443
+MAILPIT_HTTP_PORT=8025
+MAILPIT_SMTP_PORT=1025
+POSTFIX_PORT=587
+
+# Persistent Named Volumes Baseline
+TOMCAT_LOG_VOLUME="tomcat_logs"
+DIAGNOSTIC_DATA_VOLUME="diagnostic_data"
+PROMETHEUS_CONFIG_VOLUME="prometheus_config"
+PROMETHEUS_TRUSTSTORE_VOLUME="prometheus_truststore"
+PROMETHEUS_DATA_VOLUME="prometheus_data"
+ALERTMANAGER_CONFIG_VOLUME="alertmanager_config"
+ALERTMANAGER_TRUSTSTORE_VOLUME="alertmanager_truststore"
+ALERTMANAGER_DATA_VOLUME="alertmanager_data"
