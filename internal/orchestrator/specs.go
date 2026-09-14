@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/eddywiyatno/tomcat-monitoring/tmctl/internal/config"
-	"github.com/eddywiyatno/tomcat-monitoring/tmctl/internal/engine"
+	"github.com/eddywiyatno/tmctl/internal/config"
+	"github.com/eddywiyatno/tmctl/internal/engine"
 )
 
 // WorkloadSpecBuilder builds container specifications for platform services.

@@ -1,3 +1,3 @@
-module github.com/eddywiyatno/tomcat-monitoring/tmctl
+module github.com/eddywiyatno/tmctl
 
 go 1.23.6

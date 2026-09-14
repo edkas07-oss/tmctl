@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/eddywiyatno/tomcat-monitoring/tmctl/pkg/termutil"
+	"github.com/eddywiyatno/tmctl/pkg/termutil"
 )
 
 // ValidateOptions controls which validation suites to execute.

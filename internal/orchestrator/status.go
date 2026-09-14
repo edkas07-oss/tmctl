@@ -6,9 +6,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/eddywiyatno/tomcat-monitoring/tmctl/internal/config"
-	"github.com/eddywiyatno/tomcat-monitoring/tmctl/internal/engine"
-	"github.com/eddywiyatno/tomcat-monitoring/tmctl/pkg/termutil"
+	"github.com/eddywiyatno/tmctl/internal/config"
+	"github.com/eddywiyatno/tmctl/internal/engine"
+	"github.com/eddywiyatno/tmctl/pkg/termutil"
 )
 
 // ShowStatus retrieves and displays running containers and health status.

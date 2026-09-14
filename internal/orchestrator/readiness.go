@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/eddywiyatno/tomcat-monitoring/tmctl/pkg/termutil"
+	"github.com/eddywiyatno/tmctl/pkg/termutil"
 )
 
 // ReadinessProbe checks if a deployed service is accepting traffic and healthy.

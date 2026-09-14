@@ -3,9 +3,9 @@ package orchestrator
 import (
 	"context"
 
-	"github.com/eddywiyatno/tomcat-monitoring/tmctl/internal/config"
-	"github.com/eddywiyatno/tomcat-monitoring/tmctl/internal/engine"
-	"github.com/eddywiyatno/tomcat-monitoring/tmctl/pkg/termutil"
+	"github.com/eddywiyatno/tmctl/internal/config"
+	"github.com/eddywiyatno/tmctl/internal/engine"
+	"github.com/eddywiyatno/tmctl/pkg/termutil"
 )
 
 // CleanStack stops and removes platform containers, and optionally cleans volumes and networks.

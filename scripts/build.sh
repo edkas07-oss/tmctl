@@ -9,9 +9,9 @@ VERSION="$(cat "${PROJECT_ROOT}/VERSION" 2>/dev/null || echo "0.1.0")"
 GIT_COMMIT="$(git -C "${PROJECT_ROOT}" rev-parse --short HEAD 2>/dev/null || echo "unknown")"
 BUILD_DATE="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
 
-LDFLAGS="-s -w -X 'github.com/eddywiyatno/tomcat-monitoring/tmctl/internal/buildinfo.Version=${VERSION}' \
-           -X 'github.com/eddywiyatno/tomcat-monitoring/tmctl/internal/buildinfo.GitCommit=${GIT_COMMIT}' \
-           -X 'github.com/eddywiyatno/tomcat-monitoring/tmctl/internal/buildinfo.BuildDate=${BUILD_DATE}'"
+LDFLAGS="-s -w -X 'github.com/eddywiyatno/tmctl/internal/buildinfo.Version=${VERSION}' \
+           -X 'github.com/eddywiyatno/tmctl/internal/buildinfo.GitCommit=${GIT_COMMIT}' \
+           -X 'github.com/eddywiyatno/tmctl/internal/buildinfo.BuildDate=${BUILD_DATE}'"
 
 export PATH="${HOME}/.local/bin:${HOME}/.local/go/bin:${PATH}"
 

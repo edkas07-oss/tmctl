@@ -11,8 +11,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/eddywiyatno/tomcat-monitoring/tmctl/internal/config"
-	"github.com/eddywiyatno/tomcat-monitoring/tmctl/pkg/termutil"
+	"github.com/eddywiyatno/tmctl/internal/config"
+	"github.com/eddywiyatno/tmctl/pkg/termutil"
 )
 
 // IngestRules reads rules from a file or stdin and posts them to Diagnostic Service.

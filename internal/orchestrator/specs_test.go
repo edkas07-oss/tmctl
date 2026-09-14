@@ -3,7 +3,7 @@ package orchestrator
 import (
 	"testing"
 
-	"github.com/eddywiyatno/tomcat-monitoring/tmctl/internal/config"
+	"github.com/eddywiyatno/tmctl/internal/config"
 )
 
 func TestWorkloadSpecs(t *testing.T) {

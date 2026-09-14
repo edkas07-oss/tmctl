@@ -6,9 +6,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/eddywiyatno/tomcat-monitoring/tmctl/internal/config"
-	"github.com/eddywiyatno/tomcat-monitoring/tmctl/internal/engine"
-	"github.com/eddywiyatno/tomcat-monitoring/tmctl/pkg/termutil"
+	"github.com/eddywiyatno/tmctl/internal/config"
+	"github.com/eddywiyatno/tmctl/internal/engine"
+	"github.com/eddywiyatno/tmctl/pkg/termutil"
 )
 
 // Deployer coordinates container stack provisioning and deployments.
