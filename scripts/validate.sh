@@ -54,6 +54,15 @@ validate_sensitive_files() {
     )
 }
 
+validate_gofmt() {
+    export PATH="${HOME}/.local/bin:${HOME}/.local/go/bin:${PATH}"
+    local unformatted
+    unformatted="$(gofmt -l "${PROJECT_ROOT}" 2>/dev/null | grep -v "/\.git/" || true)"
+    if [[ -n "${unformatted}" ]]; then
+        fail "Unformatted Go files detected:\n${unformatted}"
+    fi
+}
+
 validate_go_vet() {
     export PATH="${HOME}/.local/bin:${HOME}/.local/go/bin:${PATH}"
     go -C "${PROJECT_ROOT}" vet ./...
@@ -63,8 +72,10 @@ main() {
     validate_required_files
     validate_shell_syntax
     validate_sensitive_files
+    validate_gofmt
     validate_go_vet
-    echo "tmctl validation passed: all layout, syntax, and static assertions valid."
+    echo "tmctl validation passed: all layout, syntax, formatting, and static assertions valid."
 }
 
 main "$@"
+

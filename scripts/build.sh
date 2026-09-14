@@ -31,5 +31,13 @@ GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -ldflags="${LDFLAGS}" -o "${PROJE
 echo "3. Building Windows amd64 binary (tmctl.exe)..."
 GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="${LDFLAGS}" -o "${PROJECT_ROOT}/bin/windows_amd64/tmctl.exe" "${PROJECT_ROOT}/cmd/tmctl"
 
+# SHA-256 Fingerprint Checksums
+echo "4. Generating SHA-256 checksums manifest..."
+(
+    cd "${PROJECT_ROOT}/bin"
+    sha256sum linux_amd64/tmctl linux_arm64/tmctl windows_amd64/tmctl.exe tmctl > checksums.txt
+)
+
 echo "Build complete. Artifacts generated in bin/:"
-ls -lh "${PROJECT_ROOT}/bin/linux_amd64/tmctl" "${PROJECT_ROOT}/bin/linux_arm64/tmctl" "${PROJECT_ROOT}/bin/windows_amd64/tmctl.exe"
+ls -lh "${PROJECT_ROOT}/bin/linux_amd64/tmctl" "${PROJECT_ROOT}/bin/linux_arm64/tmctl" "${PROJECT_ROOT}/bin/windows_amd64/tmctl.exe" "${PROJECT_ROOT}/bin/checksums.txt"
+

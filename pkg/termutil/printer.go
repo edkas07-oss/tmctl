@@ -74,7 +74,7 @@ func PrintTable(w io.Writer, headers []string, rows [][]string) {
 	tw := tabwriter.NewWriter(w, 0, 4, 2, ' ', 0)
 	headerLine := strings.Join(headers, "\t")
 	fmt.Fprintln(tw, colorize(ColorBold, headerLine))
-	
+
 	// Separator
 	var seps []string
 	for _, h := range headers {

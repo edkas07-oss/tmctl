@@ -30,6 +30,9 @@ build-all:
 	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="$(LDFLAGS)" -o bin/linux_amd64/$(BINARY_NAME) ./cmd/tmctl
 	GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -ldflags="$(LDFLAGS)" -o bin/linux_arm64/$(BINARY_NAME) ./cmd/tmctl
 	GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="$(LDFLAGS)" -o bin/windows_amd64/$(BINARY_NAME).exe ./cmd/tmctl
+	cp bin/linux_amd64/$(BINARY_NAME) bin/$(BINARY_NAME)
+	@(cd bin && sha256sum linux_amd64/$(BINARY_NAME) linux_arm64/$(BINARY_NAME) windows_amd64/$(BINARY_NAME).exe $(BINARY_NAME) > checksums.txt)
+
 
 test:
 	go test -v -race=false ./...

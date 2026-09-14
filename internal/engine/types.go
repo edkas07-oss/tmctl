@@ -45,9 +45,9 @@ type ContainerInspect struct {
 		} `json:"Health,omitempty"`
 	} `json:"State"`
 	Config struct {
-		Image string            `json:"Image"`
-		Env   []string          `json:"Env"`
-		Cmd   []string          `json:"Cmd"`
+		Image  string            `json:"Image"`
+		Env    []string          `json:"Env"`
+		Cmd    []string          `json:"Cmd"`
 		Labels map[string]string `json:"Labels"`
 	} `json:"Config"`
 	NetworkSettings struct {
@@ -75,12 +75,12 @@ type VolumeInspect struct {
 
 // NetworkInspect represents network info.
 type NetworkInspect struct {
-	ID         string            `json:"Id"`
-	Name       string            `json:"Name"`
-	Driver     string            `json:"Driver"`
-	Scope      string            `json:"Scope"`
-	Internal   bool              `json:"Internal"`
-	Labels     map[string]string `json:"Labels"`
+	ID       string            `json:"Id"`
+	Name     string            `json:"Name"`
+	Driver   string            `json:"Driver"`
+	Scope    string            `json:"Scope"`
+	Internal bool              `json:"Internal"`
+	Labels   map[string]string `json:"Labels"`
 }
 
 // ContainerSpec represents declarative container creation parameters.

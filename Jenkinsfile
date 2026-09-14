@@ -15,31 +15,25 @@ pipeline {
     }
 
     stages {
-        stage('Lint & Contract Validation') {
+        stage('Quality Gate 1: Contract & Static Linting') {
             steps {
-                sh '''
-                    ./scripts/validate.sh
-                '''
+                sh './scripts/validate.sh'
             }
         }
 
-        stage('Unit Testing') {
+        stage('Quality Gate 2: Comprehensive Unit Testing') {
             steps {
-                sh '''
-                    ./scripts/test.sh
-                '''
+                sh './scripts/test.sh'
             }
         }
 
-        stage('Build & Cross-Compilation') {
+        stage('Quality Gate 3: Deterministic Cross-Compilation') {
             steps {
-                sh '''
-                    ./scripts/build.sh
-                '''
+                sh './scripts/build.sh'
             }
         }
 
-        stage('Archive Artifacts') {
+        stage('Quality Gate 4: Archive Multi-OS Artifacts') {
             steps {
                 archiveArtifacts artifacts: 'bin/**/*', fingerprint: true, allowEmptyArchive: false
             }
@@ -47,6 +41,9 @@ pipeline {
     }
 
     post {
+        always {
+            cleanWs deleteDirs: true, notFailBuild: true
+        }
         success {
             echo "Pipeline tmctl build & validation completed successfully."
         }
@@ -55,3 +52,4 @@ pipeline {
         }
     }
 }
+

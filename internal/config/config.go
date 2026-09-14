@@ -12,43 +12,43 @@ import (
 
 // StackConfig represents the unified platform configuration.
 type StackConfig struct {
-	PlatformName        string
-	NetworkName         string
-	ContainerEngine     string
-	SocketPath          string
-	DiagnosticURL       string
-	BearerToken         string
-	RegistryURL         string
-	RegistryNamespace   string
-	RegistryTLSVerify   bool
-	ImagePullPolicy     string
-	RegistryAuthFile    string
-	MailpitImage        string
+	PlatformName      string
+	NetworkName       string
+	ContainerEngine   string
+	SocketPath        string
+	DiagnosticURL     string
+	BearerToken       string
+	RegistryURL       string
+	RegistryNamespace string
+	RegistryTLSVerify bool
+	ImagePullPolicy   string
+	RegistryAuthFile  string
+	MailpitImage      string
 
-	TomcatHTTPPort      int
-	TomcatJMXPort       int
-	PrometheusPort      int
-	AlertmanagerPort    int
-	DiagnosticPort      int
-	MailpitHTTPPort     int
-	MailpitSMTPPort     int
-	PostfixPort         int
+	TomcatHTTPPort   int
+	TomcatJMXPort    int
+	PrometheusPort   int
+	AlertmanagerPort int
+	DiagnosticPort   int
+	MailpitHTTPPort  int
+	MailpitSMTPPort  int
+	PostfixPort      int
 
-	TomcatLogVolume           string
-	DiagnosticDataVolume      string
-	PrometheusConfigVolume    string
-	PrometheusTruststoreVolume string
-	PrometheusDataVolume      string
-	AlertmanagerConfigVolume  string
+	TomcatLogVolume              string
+	DiagnosticDataVolume         string
+	PrometheusConfigVolume       string
+	PrometheusTruststoreVolume   string
+	PrometheusDataVolume         string
+	AlertmanagerConfigVolume     string
 	AlertmanagerTruststoreVolume string
-	AlertmanagerDataVolume    string
+	AlertmanagerDataVolume       string
 
-	DefaultSpoolDir     string
-	DefaultSecretsDir   string
-	DefaultTLSDir       string
-	DefaultJMXTLSDir    string
+	DefaultSpoolDir   string
+	DefaultSecretsDir string
+	DefaultTLSDir     string
+	DefaultJMXTLSDir  string
 
-	ProjectRoot         string
+	ProjectRoot string
 }
 
 var envVarPattern = regexp.MustCompile(`^\s*([A-Za-z_][A-Za-z0-9_]*)=(.*)$`)
@@ -57,39 +57,39 @@ var envVarPattern = regexp.MustCompile(`^\s*([A-Za-z_][A-Za-z0-9_]*)=(.*)$`)
 func DefaultConfig() *StackConfig {
 	homeDir, _ := os.UserHomeDir()
 	return &StackConfig{
-		PlatformName:        "tomcat-monitoring",
-		NetworkName:         "devops-lab",
-		DiagnosticURL:       "https://localhost:8443",
-		BearerToken:         "test-token-12345",
-		RegistryURL:         "localhost",
-		RegistryNamespace:   "",
-		RegistryTLSVerify:   true,
-		ImagePullPolicy:     "IfNotPresent",
-		RegistryAuthFile:    "",
-		MailpitImage:        "ghcr.io/axllent/mailpit@sha256:c96991d9bef73594c246d89ca81411d4e916f03e76a7d2d72fa2ab5dd3c9ce24",
+		PlatformName:      "tomcat-monitoring",
+		NetworkName:       "devops-lab",
+		DiagnosticURL:     "https://localhost:8443",
+		BearerToken:       "test-token-12345",
+		RegistryURL:       "localhost",
+		RegistryNamespace: "",
+		RegistryTLSVerify: true,
+		ImagePullPolicy:   "IfNotPresent",
+		RegistryAuthFile:  "",
+		MailpitImage:      "ghcr.io/axllent/mailpit@sha256:c96991d9bef73594c246d89ca81411d4e916f03e76a7d2d72fa2ab5dd3c9ce24",
 
-		TomcatHTTPPort:      8083,
-		TomcatJMXPort:       9404,
-		PrometheusPort:      9090,
-		AlertmanagerPort:    9093,
-		DiagnosticPort:      8443,
-		MailpitHTTPPort:     8025,
-		MailpitSMTPPort:     1025,
-		PostfixPort:         587,
+		TomcatHTTPPort:   8083,
+		TomcatJMXPort:    9404,
+		PrometheusPort:   9090,
+		AlertmanagerPort: 9093,
+		DiagnosticPort:   8443,
+		MailpitHTTPPort:  8025,
+		MailpitSMTPPort:  1025,
+		PostfixPort:      587,
 
-		TomcatLogVolume:           "tomcat_logs",
-		DiagnosticDataVolume:      "diagnostic_data",
-		PrometheusConfigVolume:    "prometheus_config",
-		PrometheusTruststoreVolume: "prometheus_truststore",
-		PrometheusDataVolume:      "prometheus_data",
-		AlertmanagerConfigVolume:  "alertmanager_config",
+		TomcatLogVolume:              "tomcat_logs",
+		DiagnosticDataVolume:         "diagnostic_data",
+		PrometheusConfigVolume:       "prometheus_config",
+		PrometheusTruststoreVolume:   "prometheus_truststore",
+		PrometheusDataVolume:         "prometheus_data",
+		AlertmanagerConfigVolume:     "alertmanager_config",
 		AlertmanagerTruststoreVolume: "alertmanager_truststore",
-		AlertmanagerDataVolume:    "alertmanager_data",
+		AlertmanagerDataVolume:       "alertmanager_data",
 
-		DefaultSpoolDir:     filepath.Join(homeDir, ".local", "share", "tomcat-monitoring", "spool"),
-		DefaultSecretsDir:   filepath.Join(homeDir, ".local", "share", "tomcat-monitoring", "diagnostic-service-secrets"),
-		DefaultTLSDir:       filepath.Join(homeDir, ".local", "share", "tomcat-monitoring", "diagnostic-service-tls"),
-		DefaultJMXTLSDir:    filepath.Join(homeDir, ".local", "share", "tomcat-monitoring", "jmx-exporter-tls"),
+		DefaultSpoolDir:   filepath.Join(homeDir, ".local", "share", "tomcat-monitoring", "spool"),
+		DefaultSecretsDir: filepath.Join(homeDir, ".local", "share", "tomcat-monitoring", "diagnostic-service-secrets"),
+		DefaultTLSDir:     filepath.Join(homeDir, ".local", "share", "tomcat-monitoring", "diagnostic-service-tls"),
+		DefaultJMXTLSDir:  filepath.Join(homeDir, ".local", "share", "tomcat-monitoring", "jmx-exporter-tls"),
 	}
 }
 
