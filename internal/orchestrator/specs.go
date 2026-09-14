@@ -79,9 +79,15 @@ func (b *WorkloadSpecBuilder) BuildPrometheusSpec() engine.ContainerSpec {
 		Ports: []engine.PortBinding{
 			{HostPort: b.cfg.PrometheusPort, ContainerPort: 9090, Protocol: "tcp"},
 		},
+		Cmd: []string{
+			"--config.file=/etc/prometheus/prometheus.yml",
+			"--storage.tsdb.path=/prometheus",
+			"--storage.tsdb.retention.time=15d",
+			"--web.enable-lifecycle",
+		},
 		Volumes: []engine.VolumeMount{
 			{Source: b.cfg.PrometheusConfigVolume, Target: "/etc/prometheus", ReadOnly: true, Mode: "ro", IsVolume: true},
-			{Source: b.cfg.PrometheusTruststoreVolume, Target: "/etc/prometheus/ssl", ReadOnly: true, Mode: "ro", IsVolume: true},
+			{Source: b.cfg.PrometheusTruststoreVolume, Target: "/run/secrets/tomcat-monitoring", ReadOnly: true, Mode: "ro", IsVolume: true},
 			{Source: b.cfg.PrometheusDataVolume, Target: "/prometheus", ReadOnly: false, Mode: b.getVolumeMode(false, true), IsVolume: true},
 		},
 	}
@@ -98,9 +104,13 @@ func (b *WorkloadSpecBuilder) BuildAlertmanagerSpec() engine.ContainerSpec {
 		Ports: []engine.PortBinding{
 			{HostPort: b.cfg.AlertmanagerPort, ContainerPort: 9093, Protocol: "tcp"},
 		},
+		Cmd: []string{
+			"--config.file=/etc/alertmanager/alertmanager.yml",
+			"--storage.path=/alertmanager",
+		},
 		Volumes: []engine.VolumeMount{
 			{Source: b.cfg.AlertmanagerConfigVolume, Target: "/etc/alertmanager", ReadOnly: true, Mode: "ro", IsVolume: true},
-			{Source: b.cfg.AlertmanagerTruststoreVolume, Target: "/etc/alertmanager/secrets", ReadOnly: true, Mode: "ro", IsVolume: true},
+			{Source: b.cfg.AlertmanagerTruststoreVolume, Target: "/run/secrets/tomcat-monitoring", ReadOnly: true, Mode: "ro", IsVolume: true},
 			{Source: b.cfg.AlertmanagerDataVolume, Target: "/alertmanager", ReadOnly: false, Mode: b.getVolumeMode(false, true), IsVolume: true},
 		},
 	}
@@ -121,12 +131,18 @@ func (b *WorkloadSpecBuilder) BuildDiagnosticSpec() engine.ContainerSpec {
 	volROZ := b.getVolumeMode(true, true)
 	volZ := b.getVolumeMode(false, true)
 
+	userns := ""
+	if runtime.GOOS == "linux" {
+		userns = "keep-id"
+	}
+
 	return engine.ContainerSpec{
 		Name:          "diagnostic-service",
 		Image:         b.formatImage("tomcat-diagnostic-service", "latest"),
 		Network:       b.cfg.NetworkName,
 		NetworkAlias:  "diagnostic-service",
 		RestartPolicy: "on-failure:5",
+		UsernsMode:    userns,
 		Env: []string{
 			"NODE_EXTRA_CA_CERTS=/run/tomcat-diagnostic/tls/postfix-ca.crt",
 		},
@@ -151,9 +167,13 @@ func (b *WorkloadSpecBuilder) BuildDiagnosticSpec() engine.ContainerSpec {
 
 // BuildMailpitSpec creates Mailpit container spec.
 func (b *WorkloadSpecBuilder) BuildMailpitSpec() engine.ContainerSpec {
+	img := b.cfg.MailpitImage
+	if img == "" {
+		img = "ghcr.io/axllent/mailpit@sha256:c96991d9bef73594c246d89ca81411d4e916f03e76a7d2d72fa2ab5dd3c9ce24"
+	}
 	return engine.ContainerSpec{
 		Name:          "mailpit",
-		Image:         "ghcr.io/axllent/mailpit:v1.31.0",
+		Image:         img,
 		Network:       b.cfg.NetworkName,
 		NetworkAlias:  "mailpit",
 		RestartPolicy: "on-failure:5",
@@ -172,8 +192,5 @@ func (b *WorkloadSpecBuilder) BuildPostfixSpec() engine.ContainerSpec {
 		Network:       b.cfg.NetworkName,
 		NetworkAlias:  "postfix-relay",
 		RestartPolicy: "on-failure:5",
-		Ports: []engine.PortBinding{
-			{HostPort: b.cfg.PostfixPort, ContainerPort: 587, Protocol: "tcp"},
-		},
 	}
 }

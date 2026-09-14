@@ -158,20 +158,26 @@ func (a *RESTEngineAdapter) CreateContainer(ctx context.Context, spec ContainerS
 		restartMaxRetries = 0
 	}
 
+	hostConfig := map[string]interface{}{
+		"Binds":        binds,
+		"PortBindings": portBindings,
+		"RestartPolicy": map[string]interface{}{
+			"Name":              restartPolicyName,
+			"MaximumRetryCount": restartMaxRetries,
+		},
+		"NetworkMode": spec.Network,
+	}
+
+	if spec.UsernsMode != "" {
+		hostConfig["UsernsMode"] = spec.UsernsMode
+	}
+
 	payload := map[string]interface{}{
 		"Image":        spec.Image,
 		"ExposedPorts": exposedPorts,
 		"Env":          spec.Env,
 		"Labels":       spec.Labels,
-		"HostConfig": map[string]interface{}{
-			"Binds":        binds,
-			"PortBindings": portBindings,
-			"RestartPolicy": map[string]interface{}{
-				"Name":              restartPolicyName,
-				"MaximumRetryCount": restartMaxRetries,
-			},
-			"NetworkMode": spec.Network,
-		},
+		"HostConfig":   hostConfig,
 	}
 
 	if len(spec.Cmd) > 0 {

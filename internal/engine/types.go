@@ -96,6 +96,7 @@ type ContainerSpec struct {
 	Entrypoint    []string
 	RestartPolicy string
 	User          string
+	UsernsMode    string
 	PullPolicy    string
 	Labels        map[string]string
 }

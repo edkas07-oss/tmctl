@@ -25,7 +25,7 @@ func NewDeployer(client engine.EngineClient, cfg *config.StackConfig) *Deployer 
 		client:  client,
 		cfg:     cfg,
 		builder: NewWorkloadSpecBuilder(cfg),
-		probe:   NewReadinessProbe(20*time.Second, 1*time.Second),
+		probe:   NewReadinessProbe(45*time.Second, 1*time.Second),
 	}
 }
 
@@ -133,11 +133,11 @@ func (d *Deployer) resolveTargets(target string) []targetTask {
 	case "mailpit":
 		return []targetTask{{Name: "mailpit", Spec: d.builder.BuildMailpitSpec(), ProbePort: d.cfg.MailpitHTTPPort}}
 	case "postfix", "postfix-relay":
-		return []targetTask{{Name: "postfix-relay", Spec: d.builder.BuildPostfixSpec(), ProbePort: d.cfg.PostfixPort}}
+		return []targetTask{{Name: "postfix-relay", Spec: d.builder.BuildPostfixSpec(), ProbePort: 0}}
 	case "all", "":
 		return []targetTask{
 			{Name: "mailpit", Spec: d.builder.BuildMailpitSpec(), ProbePort: d.cfg.MailpitHTTPPort},
-			{Name: "postfix-relay", Spec: d.builder.BuildPostfixSpec(), ProbePort: d.cfg.PostfixPort},
+			{Name: "postfix-relay", Spec: d.builder.BuildPostfixSpec(), ProbePort: 0},
 			{Name: "tomcat-jmx-exporter", Spec: d.builder.BuildTomcatSpec(), ProbePort: d.cfg.TomcatJMXPort},
 			{Name: "prometheus", Spec: d.builder.BuildPrometheusSpec(), ProbePort: d.cfg.PrometheusPort},
 			{Name: "alertmanager", Spec: d.builder.BuildAlertmanagerSpec(), ProbePort: d.cfg.AlertmanagerPort},

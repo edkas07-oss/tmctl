@@ -23,6 +23,7 @@ type StackConfig struct {
 	RegistryTLSVerify   bool
 	ImagePullPolicy     string
 	RegistryAuthFile    string
+	MailpitImage        string
 
 	TomcatHTTPPort      int
 	TomcatJMXPort       int
@@ -65,6 +66,7 @@ func DefaultConfig() *StackConfig {
 		RegistryTLSVerify:   true,
 		ImagePullPolicy:     "IfNotPresent",
 		RegistryAuthFile:    "",
+		MailpitImage:        "ghcr.io/axllent/mailpit@sha256:c96991d9bef73594c246d89ca81411d4e916f03e76a7d2d72fa2ab5dd3c9ce24",
 
 		TomcatHTTPPort:      8083,
 		TomcatJMXPort:       9404,
@@ -160,22 +162,22 @@ func cleanValue(raw string) string {
 			val = val[1 : len(val)-1]
 		}
 	}
-	// Handle bash variable expansion like "${VAR:-default}" or "${VAR}"
-	if strings.HasPrefix(val, "${") && strings.HasSuffix(val, "}") {
-		inner := val[2 : len(val)-1]
-		if idx := strings.Index(inner, ":-"); idx != -1 {
-			envKey := inner[:idx]
-			defaultVal := inner[idx+2:]
+	// Handle ${VAR:-default} pattern anywhere in the value
+	re := regexp.MustCompile(`\$\{([A-Za-z_][A-Za-z0-9_]*)(?::-([^}]*))?\}`)
+	val = re.ReplaceAllStringFunc(val, func(m string) string {
+		sub := re.FindStringSubmatch(m)
+		if len(sub) == 3 {
+			envKey := sub[1]
+			defaultVal := sub[2]
 			if envVal := os.Getenv(envKey); envVal != "" {
 				return envVal
 			}
 			return defaultVal
 		}
-		if envVal := os.Getenv(inner); envVal != "" {
-			return envVal
-		}
-		return ""
-	}
+		return m
+	})
+	// Expand other $VAR / ${VAR}
+	val = os.ExpandEnv(val)
 	return val
 }
 
@@ -219,6 +221,10 @@ func assignConfigKey(cfg *StackConfig, key, val string) {
 		}
 	case "REGISTRY_AUTH_FILE":
 		cfg.RegistryAuthFile = val
+	case "MAILPIT_IMAGE":
+		if val != "" {
+			cfg.MailpitImage = val
+		}
 	case "TOMCAT_HTTP_PORT":
 		if p, err := strconv.Atoi(val); err == nil {
 			cfg.TomcatHTTPPort = p
@@ -320,5 +326,8 @@ func applyEnvOverrides(cfg *StackConfig) {
 	}
 	if v := os.Getenv("REGISTRY_AUTH_FILE"); v != "" {
 		cfg.RegistryAuthFile = v
+	}
+	if v := os.Getenv("MAILPIT_IMAGE"); v != "" {
+		cfg.MailpitImage = v
 	}
 }
