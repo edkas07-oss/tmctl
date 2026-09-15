@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	winio "github.com/Microsoft/go-winio"
 )
 
 func createTransport(socketPath string) (*http.Transport, error) {
@@ -29,17 +31,16 @@ func createTransport(socketPath string) (*http.Transport, error) {
 
 	return &http.Transport{
 		DialContext: func(ctx context.Context, _, _ string) (net.Conn, error) {
-			// In Windows Go stdlib or npipe connection
-			// Using standard net.Dial with timeout
-			var d net.Dialer
-			d.Timeout = 5 * time.Second
-			// Windows named pipes can be dialed via net.Dial("tcp", ...) or specific pipe dialers.
-			// If pipe fails, fallback to local TCP Docker/Podman desktop endpoint.
-			conn, err := net.Dial("tcp", "127.0.0.1:2375")
+			conn, err := winio.DialPipeContext(ctx, pipePath)
 			if err == nil {
 				return conn, nil
 			}
-			return d.DialContext(ctx, "tcp", "localhost:2375")
+
+			// Fallback to local TCP Docker daemon if pipe connection fails
+			var d net.Dialer
+			d.Timeout = 5 * time.Second
+			return d.DialContext(ctx, "tcp", "127.0.0.1:2375")
 		},
 	}, nil
 }
+
