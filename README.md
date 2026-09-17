@@ -1,10 +1,22 @@
-# tmctl — Unified Cross-Platform Operator CLI for Tomcat Monitoring
+# 🚀 tmctl — Unified Cross-Platform Operator CLI for Tomcat Monitoring
 
 [![Go Version](https://img.shields.io/badge/go-1.23+-00ADD8.svg)](https://go.dev)
 [![Cross-Platform](https://img.shields.io/badge/platform-linux%20%7C%20windows-lightgrey.svg)](README.md)
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![Security](https://img.shields.io/badge/Security-Zero%20Dependency-purple.svg)](CONFIG)
 
 `tmctl` (*Tomcat Monitoring Control CLI*) is a unified, single static Go binary designed to interface directly with **Container Engine Socket APIs** (Podman and Docker). It orchestrates containers, manages diagnostic rules, authenticates registries, and validates platform compliance uniformly across operating systems (*Linux and Windows*), eliminating reliance on legacy, brittle Bash scripts.
+
+---
+
+## 📑 Table of Contents
+
+- [🏛️ Architecture & Core Advantages](#️-architecture--core-advantages)
+- [🚀 Installation & Compilation](#-installation--compilation)
+- [📖 Subcommand Usage Guide](#-subcommand-usage-guide)
+- [🧪 Validation & Multi-OS Test Results](#-validation--multi-os-test-results)
+- [📂 Repository Structure](#-repository-structure)
+- [📄 License, Ownership & Disclaimer](#-license-ownership--disclaimer)
 
 ---
 
@@ -220,3 +232,50 @@ make test
 # Execute static repository layout and JSON schema validation
 make validate
 ```
+
+---
+
+## 📂 Repository Structure
+
+```text
+tmctl/
+├── AGENTS.md                  Agent governance & developer rules
+├── CONFIG                     Baseline configuration parameters
+├── CONFIG.example             Enterprise container registry template
+├── LICENSE                    Apache License 2.0
+├── Makefile                   Build and test orchestration
+├── PROJECT                    Script-readable project identifier
+├── README.md                  Technical architecture documentation
+├── VERSION                    Release version
+├── cmd/
+│   └── tmctl/                 Main CLI entrypoint
+├── internal/
+│   ├── buildinfo/             Build metadata and git commit stamping
+│   ├── config/                Configuration parser and environment resolver
+│   ├── engine/                Container engine socket abstraction layer
+│   ├── orchestrator/          Container stack deploy, status, and clean handlers
+│   ├── registry/              Container registry login and token isolation
+│   ├── rules/                 Declarative rulepack ingestion and export client
+│   └── validator/             Static repository and JSON schema validator
+├── pkg/
+│   └── termutil/              Terminal formatting and color utilities
+└── scripts/
+    ├── build.sh               Native build runner
+    ├── build-all.sh           Cross-compilation runner
+    ├── test.sh                Unit test execution script
+    └── validate.sh            Static validation runner
+```
+
+---
+
+## 📄 License, Ownership & Disclaimer
+
+### 👤 Author & Ownership
+This repository, along with its associated architectures, automation components, and codebases, is designed, authored, and maintained by **Eddy Wiyatno** ([@edkas07-oss](https://github.com/edkas07-oss)).
+
+### ⚖️ License
+This project is licensed under the [Apache License 2.0](LICENSE) - see the [LICENSE](LICENSE) file for complete terms and conditions.
+
+### 🛡️ Research & Development Disclaimer
+> [!NOTE]
+> All research, development, architectural design, prototyping, test fixtures, and validation suites in this repository were conducted and verified exclusively within **independent, personal laboratory environments** using personal hardware, network infrastructure, and self-hosted tooling. No confidential corporate assets, proprietary production data, or third-party enterprise infrastructure were utilized in the creation or publication of this project.
