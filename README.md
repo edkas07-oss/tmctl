@@ -1,19 +1,21 @@
-# `tmctl` — Unified Cross-Platform Operator CLI for Tomcat Monitoring
+# tmctl — Unified Cross-Platform Operator CLI for Tomcat Monitoring
 
 [![Go Version](https://img.shields.io/badge/go-1.23+-00ADD8.svg)](https://go.dev)
 [![Cross-Platform](https://img.shields.io/badge/platform-linux%20%7C%20windows-lightgrey.svg)](README.md)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
-`tmctl` (*Tomcat Monitoring Control CLI*) adalah kakas baris perintah tunggal (*Single Static Binary*) berbasis bahasa Go yang berkomunikasi langsung dengan **Container Engine Socket API** (Podman / Docker) untuk orkestrasi kontainer dan manajemen platform secara seragam lintas OS (*Linux & Windows*), mengeliminasi ketergantungan pada kumpulan skrip imperatif Bash `scripts/*.sh`.
+`tmctl` (*Tomcat Monitoring Control CLI*) is a unified, single static Go binary designed to interface directly with **Container Engine Socket APIs** (Podman and Docker). It orchestrates containers, manages diagnostic rules, authenticates registries, and validates platform compliance uniformly across operating systems (*Linux and Windows*), eliminating reliance on legacy, brittle Bash scripts.
 
 ---
 
-## 🏛️ Arsitektur & Keunggulan
+## 🏛️ Architecture & Core Advantages
 
-- **Zero Runtime Dependency:** Dikompilasi sebagai *single static binary* (`CGO_ENABLED=0`) tanpa memerlukan interpreter Python, Node.js, atau Bash pada mesin operator.
-- **Direct Socket API Communication:** Berkomunikasi langsung via Unix Domain Socket (`/run/user/.../podman.sock` atau `/var/run/docker.sock`), Windows Named Pipe (`\\.\pipe\docker_engine`), atau TCP mTLS.
-- **Multi-OS Native Support:** Mendukung eksekusi seragam pada workstation/server Linux (`tmctl`) dan Windows (`tmctl.exe`).
-- **Zero-Downtime Rollback:** Melakukan snapshot rename kontainer sebelum deployment baru dan auto-rollback seketika jika health probe gagal.
+- **Zero Runtime Dependencies:** Compiled as a single static binary (`CGO_ENABLED=0`) requiring no external Python, Node.js, or Bash runtimes on the operator host.
+- **Direct Engine Socket API Communication:** Communicates directly over Unix Domain Sockets (`/run/user/.../podman.sock` or `/var/run/docker.sock`), Windows Named Pipes (`\\.\pipe\docker_engine`), or TCP mTLS.
+- **Native Multi-OS Execution:** Provides identical command syntax and behavior on Linux (`tmctl`) and Windows Server (`tmctl.exe`).
+- **Two-Tier Storage Aware:** Coordinates configurations, secrets, and TLS certificates from the host workspace (`/opt/tm-home` on Linux, `C:\tm-home` on Windows) while binding to high-I/O Engine Named Volumes (`prometheus_data`, `diagnostic_data`, `tomcat_logs`).
+- **Zero-Downtime Safe Rollback:** Executes pre-deployment snapshot container renames and automatically rolls back if health probes fail.
+- **Declarative Rulepack Ingestion:** Ingests and exports JSON diagnostic rules against the Autonomous Diagnostic Service at runtime with zero container restarts.
 
 ```mermaid
 flowchart LR
@@ -40,86 +42,86 @@ flowchart LR
 
 ---
 
-## 🚀 Instalasi & Kompilasi
+## 🚀 Installation & Compilation
 
-### Kompilasi dari Source
+### Build from Source
 
 ```bash
-# Build native binary
+# Build native binary for current host architecture
 make build
 
-# Cross-compilation matrix (Linux amd64, Linux arm64, Windows amd64)
+# Cross-compile full matrix (Linux amd64, Linux arm64, Windows amd64)
 make build-all
 
-# Install ke ~/.local/bin
+# Install binary to ~/.local/bin
 make install
 ```
 
 ---
 
-## 📖 Panduan Penggunaan Subperintah
+## 📖 Subcommand Usage Guide
 
-### 1. Manajemen Lifecycle Stack (`stack`)
+### 1. Stack Lifecycle Management (`stack`)
 
 ```bash
-# Men-deploy seluruh tumpukan kontainer
+# Deploy the complete monitoring stack
 tmctl stack deploy
 
-# Men-deploy workload tertentu
+# Deploy a specific target workload
 tmctl stack deploy --target tomcat
 tmctl stack deploy --target prometheus
 tmctl stack deploy --target diagnostic
 
-# Memeriksa status kesehatan kontainer
+# Inspect container health and port mappings
 tmctl stack status
 
-# Menghentikan dan membersihkan kontainer
+# Stop and remove stack containers
 tmctl stack clean
 
-# Membersihkan kontainer beserta volume dan network
+# Full teardown including associated volumes and networks
 tmctl stack clean --all
 ```
 
-### 2. Manajemen AI Diagnostic Rules (`rules`)
+### 2. Autonomous Diagnostic Rulepack Management (`rules`)
 
 ```bash
-# Meng-ingest rulepack JSON (objek tunggal atau batch array)
+# Ingest single or batch JSON rulepacks into the Diagnostic Service
 tmctl rules ingest path/to/rules.json
 
-# Meng-ingest dengan custom bearer token
-tmctl rules ingest rules.json --token "my-custom-token"
+# Ingest with a custom bearer authentication token
+tmctl rules ingest rules.json --token "my-custom-bearer-token"
 
-# Mengekspor semua aturan aktif ke stdout
+# Export all active diagnostic rules to stdout
 tmctl rules export
 
-# Mengekspor aturan berdasarkan kategori
+# Export rules filtered by specific failure domain category
 tmctl rules export --category database_persistence --output rules-db.json
 
-# Menampilkan ringkasan kategori aktif
+# Display summary of active failure domain categories
 tmctl rules export --categories
 ```
 
-### 3. Autentikasi Enterprise Container Registry (`registry`)
+### 3. Enterprise Container Registry Authentication (`registry`)
 
 ```bash
-# Login ke private container registry dengan isolasi authfile
+# Log in to private container registry with isolated authfile
 tmctl registry login registry.internal.corp:5000 admin --token-file /path/to/token.txt --auth-file /path/to/auth.json
 
-# Logout dari registry
+# Log out from private registry
 tmctl registry logout registry.internal.corp:5000 --auth-file /path/to/auth.json
 ```
 
-### 4. Validasi Kepatuhan & Kontrak (`validate`)
+### 4. Contract & Compliance Validation (`validate`)
 
 ```bash
-# Validasi repository layout, integritas JSON schema, dan larangan file rahasia
+# Validate repository layout, JSON schema integrity, and audit forbidden sensitive files
 tmctl validate
 
-# Validasi direktori target spesifik
+# Validate a specific target project directory
 tmctl validate --dir /path/to/project
 ```
 
-### 5. Informasi Versi (`version`)
+### 5. Version Information (`version`)
 
 ```bash
 tmctl version
@@ -127,15 +129,15 @@ tmctl version
 
 ---
 
-## 🧪 Validasi & Hasil Pengujian (*Multi-OS Test Results*)
+## 🧪 Validation & Multi-OS Test Results
 
-`tmctl` telah melalui rangkaian pengujian menyeluruh pada workstation pengembang, CI runner, dan server produksi lintas sistem operasi (*Linux & Windows Server*).
+`tmctl` undergoes comprehensive testing across local development workstations, CI runners, and live multi-OS production hosts (*Linux and Windows Server*).
 
-### 📊 Matriks Kompilasi Silang (*Cross-Compilation Matrix*)
+### 📊 Cross-Compilation Matrix
 
-Proses kompilasi menghasilkan biner statis mandiri (*Zero External Dependency*):
+All binaries are compiled statically with zero external shared library dependencies:
 
-| Target OS | Target Arsitektur | Biner Output | Ukuran | Status Pengujian |
+| Target OS | Target Architecture | Output Binary | Size | Test Status |
 | :--- | :--- | :--- | :---: | :---: |
 | **Linux** | `amd64` (x86_64) | `bin/linux_amd64/tmctl` | 5.7 MB | **100% Passed (Ubuntu / Debian / RHEL / Amazon Linux)** |
 | **Linux** | `arm64` (AArch64) | `bin/linux_arm64/tmctl` | 5.5 MB | **100% Compiled & Verified (AWS Graviton)** |
@@ -143,9 +145,9 @@ Proses kompilasi menghasilkan biner statis mandiri (*Zero External Dependency*):
 
 ---
 
-### 1. Hasil Pengujian Unit Test Suite Go
+### 1. Go Unit Test Suite Results
 
-Pengujian mencakup seluruh package internal (`config`, `orchestrator`, `registry`, `validator`):
+Test suite covers all core internal packages (`config`, `orchestrator`, `registry`, `validator`):
 
 ```text
 === RUN   TestDefaultConfig
@@ -169,9 +171,9 @@ PASS (ok: internal/config, internal/orchestrator, internal/registry, internal/va
 
 ---
 
-### 2. Hasil Pengujian Live di Linux (Podman & Docker Socket API)
+### 2. Live Linux Test Output (Podman & Docker Socket API)
 
-Pengujian inspeksi status stack kontainer via Unix Domain Socket (`/run/user/1000/podman/podman.sock` & `/var/run/docker.sock`):
+Live inspection of the container stack via Unix Domain Socket (`/run/user/1000/podman/podman.sock` and `/var/run/docker.sock`):
 
 ```text
 $ tmctl stack status
@@ -189,9 +191,9 @@ Postfix Enterprise SMTP Relay  postfix-relay        localhost/postfix-relay:late
 
 ---
 
-### 3. Hasil Pengujian Live di Windows Server (PowerShell & Docker Named Pipe)
+### 3. Live Windows Server Test Output (PowerShell & Docker Named Pipe)
 
-Pengujian dieksekusi langsung pada target **Windows Server 2019 Datacenter** di AWS EC2 (`aws-ec2-win-01`):
+Direct execution on **Windows Server 2019 Datacenter** in AWS EC2 (`aws-ec2-win-01`):
 
 ```powershell
 PS C:\tm-home> .\bin\tmctl.exe version
@@ -209,12 +211,12 @@ PS C:\tm-home> .\bin\tmctl.exe validate --dir C:\tm-home
 
 ---
 
-### 4. Perintah Validasi Lokal
+### 4. Local Validation Commands
 
 ```bash
-# Menjalankan unit testing otomatis
+# Execute automated Go unit tests
 make test
 
-# Menjalankan static layout validation
+# Execute static repository layout and JSON schema validation
 make validate
 ```
