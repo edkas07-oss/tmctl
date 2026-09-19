@@ -113,10 +113,10 @@ flowchart TD
     START["tmctl invocation"] --> CHECK_FLAG{"--socket or --engine flag provided?"}
     CHECK_FLAG -->|Yes| USE_EXPLICIT["Use explicitly provided socket path"]
     CHECK_FLAG -->|No| CHECK_OS{"Operating System?"}
-    CHECK_OS -->|Windows| WIN_PIPE["Bind to \\\\.\\pipe\\docker_engine"]
+    CHECK_OS -->|Windows| WIN_PIPE["Bind to Named Pipe (docker_engine)"]
     CHECK_OS -->|Linux| PROBE_SOCK{"Probe Unix Socket Candidates"}
-    PROBE_SOCK --> S1["/run/user/<uid>/podman/podman.sock (Podman Rootless)"]
-    PROBE_SOCK --> S2["/run/user/<uid>/docker.sock (Docker Rootless)"]
+    PROBE_SOCK --> S1["/run/user/UID/podman/podman.sock (Podman Rootless)"]
+    PROBE_SOCK --> S2["/run/user/UID/docker.sock (Docker Rootless)"]
     PROBE_SOCK --> S3["/var/run/docker.sock (Docker System)"]
     PROBE_SOCK --> S4["/run/podman/podman.sock (Podman Root)"]
 ```
