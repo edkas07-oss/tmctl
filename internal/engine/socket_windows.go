@@ -43,4 +43,3 @@ func createTransport(socketPath string) (*http.Transport, error) {
 		},
 	}, nil
 }
-

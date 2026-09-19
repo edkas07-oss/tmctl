@@ -11,12 +11,37 @@
 
 ## 📑 Table of Contents
 
+- [💡 Why tmctl? (Motivation & Design Rationale)](#-why-tmctl-motivation--design-rationale)
 - [🏛️ Architecture & Core Advantages](#️-architecture--core-advantages)
 - [🚀 Installation & Compilation](#-installation--compilation)
 - [📖 Subcommand Usage Guide](#-subcommand-usage-guide)
 - [🧪 Validation & Multi-OS Test Results](#-validation--multi-os-test-results)
 - [📂 Repository Structure](#-repository-structure)
 - [📄 License, Ownership & Disclaimer](#-license-ownership--disclaimer)
+
+---
+
+## 💡 Why `tmctl`? (Motivation & Design Rationale)
+
+In complex multi-OS enterprise environments, relying solely on imperative Bash scripts or raw `docker`/`podman` CLI commands introduces critical operational friction:
+
+1. **Linux vs. Windows Discrepancy (Shell Lock-in):** Shell scripts (`.sh`) fail natively on Windows hosts without extra emulation layers (WSL2 / Git Bash), and maintaining dual scripts (`.sh` + `.ps1`) leads to logic desynchronization.
+2. **Podman vs. Docker Differences (Engine Duality):** Handling rootless sockets, SELinux relabeling (`:z`), user namespaces (`--userns=keep-id`), and Windows named pipes (`\\.\pipe\docker_engine`) requires fragile shell conditionals when using raw CLI commands.
+3. **Structured API Communication over String Scraping:** Raw CLI commands output unstructured text requiring `grep`/`awk`/`jq` parsing. In contrast, `tmctl` communicates directly with the **Container Engine REST API over sockets**, receiving deterministic, structured JSON payloads.
+4. **Stateful Orchestration & Safe Rollback:** `tmctl` handles end-to-end two-tier storage provisioning, pre-deployment snapshot container renames, and automatic rollback on health probe timeouts.
+5. **Unified Operational Hub:** Rather than executing scattered utility scripts, `tmctl` consolidates container lifecycle management, live dynamic rulepack ingestion/export, isolated private registry authentication, and platform contract validation into a single binary.
+
+### 📊 Feature & Approach Comparison Matrix
+
+| Operational Capability | Raw `docker` / `podman` CLI | Imperative Shell Scripts (`.sh` / `.ps1`) | **`tmctl` (Unified Go Binary)** |
+| :--- | :--- | :--- | :--- |
+| **Windows Native Execution** | Requires PowerShell adaptations | Requires duplicate `.ps1` scripts | **Single native static binary (`tmctl.exe`)** |
+| **Engine Abstraction** | Manual syntax switching | Complex conditional wrappers | **Automatic socket/pipe auto-detection** |
+| **Status & Error Parsing** | Unstructured CLI stdout | Brittle regex / text scraping | **Pure JSON via direct Socket REST API** |
+| **Runtime Dependencies** | Engine CLI installed on host | Requires Bash, Coreutils, jq | **Zero external dependencies (`CGO_ENABLED=0`)** |
+| **Automated Safe Rollback** | Manual intervention required | Complex & error-prone shell logic | **Built-in stateful snapshot & auto-rollback** |
+| **Platform Contract Audit** | Not supported | Requires external validation tools | **Built-in compliance & schema validator** |
+| **Orchestrator Integration** | Fragile shell commands in Ansible/CI | High risk of host lock-in | **Deterministic, uniform execution across CI/CD** |
 
 ---
 
