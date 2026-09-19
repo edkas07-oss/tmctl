@@ -81,16 +81,10 @@ flowchart LR
 
 ## 🚀 Installation & Compilation
 
-### Build from Source
+For complete build prerequisites, cross-compilation matrix details, and path configuration, please refer to the dedicated [**`INSTALL.md`**](INSTALL.md) guide.
 
 ```bash
-# Build native binary for current host architecture
-make build
-
-# Cross-compile full matrix (Linux amd64, Linux arm64, Windows amd64)
-make build-all
-
-# Install binary to ~/.local/bin
+# Quick build and installation to ~/.local/bin
 make install
 ```
 
