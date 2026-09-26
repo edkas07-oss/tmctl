@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -9,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 )
 
 // RESTEngineAdapter implements EngineClient over Docker/Podman Engine REST API.
@@ -534,3 +536,77 @@ func (a *RESTEngineAdapter) InspectImage(ctx context.Context, imageName string) 
 	body, _ := io.ReadAll(resp.Body)
 	return false, fmt.Errorf("inspect image failed (%d): %s", resp.StatusCode, string(body))
 }
+
+func (a *RESTEngineAdapter) StreamEvents(ctx context.Context, targetContainer string) (<-chan EventMessage, <-chan error) {
+	eventCh := make(chan EventMessage, 64)
+	errCh := make(chan error, 1)
+
+	go func() {
+		defer close(eventCh)
+		defer close(errCh)
+
+		// Build filter parameters
+		filterMap := make(map[string][]string)
+		if targetContainer != "" {
+			filterMap["container"] = []string{targetContainer}
+		}
+		filterMap["type"] = []string{"container"}
+
+		filterBytes, _ := json.Marshal(filterMap)
+		endpoint := fmt.Sprintf("%s/events?filters=%s", a.baseURL, url.QueryEscape(string(filterBytes)))
+
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
+		if err != nil {
+			errCh <- fmt.Errorf("failed to create events request: %w", err)
+			return
+		}
+
+		resp, err := a.client.Do(req)
+		if err != nil {
+			errCh <- fmt.Errorf("failed to connect to event stream: %w", err)
+			return
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			body, _ := io.ReadAll(resp.Body)
+			errCh <- fmt.Errorf("event stream returned status %d: %s", resp.StatusCode, string(body))
+			return
+		}
+
+		reader := bufio.NewReader(resp.Body)
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+				line, err := reader.ReadBytes('\n')
+				if err != nil {
+					if err == io.EOF || ctx.Err() != nil {
+						return
+					}
+					errCh <- fmt.Errorf("error reading event stream: %w", err)
+					return
+				}
+
+				lineStr := strings.TrimSpace(string(line))
+				if lineStr == "" {
+					continue
+				}
+
+				var event EventMessage
+				if err := json.Unmarshal([]byte(lineStr), &event); err != nil {
+					dec := json.NewDecoder(strings.NewReader(lineStr))
+					if decErr := dec.Decode(&event); decErr != nil {
+						continue
+					}
+				}
+
+				eventCh <- event
+			}
+		}
+	}()
+
+	return eventCh, errCh
+}
+

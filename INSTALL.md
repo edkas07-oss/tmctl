@@ -182,3 +182,25 @@ tmctl stack status
 # 3. Validate repository layout and platform governance rules
 tmctl validate
 ```
+
+---
+
+## 8. Autonomous GitOps & Host Agent Setup (Recommended)
+
+To deploy and manage the monitoring stack autonomously via pure pull-based GitOps:
+
+```bash
+# 1. Initialize GitOps environment with autonomous OS timer (Linux systemd timer / Windows Task)
+tmctl gitops init --repo http://gitea.internal.corp:3000/gitadm/tomcat-monitoring-gitops.git --timer
+
+# 2. Trigger initial synchronization
+tmctl gitops sync
+
+# 3. Install integrated host telemetry agent as a persistent background daemon
+tmctl agent install
+
+# 4. Verify GitOps and agent status
+tmctl gitops status
+tmctl agent status
+```
+

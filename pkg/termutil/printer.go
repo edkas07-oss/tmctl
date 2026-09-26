@@ -69,6 +69,21 @@ func Step(step int, total int, format string, a ...interface{}) {
 	fmt.Printf("%s %s\n", colorize(ColorCyan, prefix), msg)
 }
 
+// Header prints a bold cyan header banner.
+func Header(title string) {
+	fmt.Println()
+	fmt.Println(colorize(ColorCyan+ColorBold, "========================================================"))
+	fmt.Printf("%s\n", colorize(ColorCyan+ColorBold, " "+title))
+	fmt.Println(colorize(ColorCyan+ColorBold, "========================================================"))
+	fmt.Println()
+}
+
+// Bullet prints an indented bullet item.
+func Bullet(format string, a ...interface{}) {
+	msg := fmt.Sprintf(format, a...)
+	fmt.Printf("  • %s\n", msg)
+}
+
 // PrintTable formats tabular data neatly.
 func PrintTable(w io.Writer, headers []string, rows [][]string) {
 	tw := tabwriter.NewWriter(w, 0, 4, 2, ' ', 0)

@@ -25,17 +25,21 @@
 ## 📑 Table of Contents
 
 - [💡 Key Capabilities](#-key-capabilities)
-- [🏛️ Architecture: The 4 Operational Pillars](#️-architecture-the-4-operational-pillars)
+- [🏛️ Architecture: The 6 Operational Pillars](#️-architecture-the-6-operational-pillars)
 - [🚀 Quick Start & Compilation](#-quick-start--compilation)
   - [Prerequisites](#prerequisites)
   - [Compilation](#compilation)
   - [Standard Multi-OS Installation & Directory Layouts](#standard-multi-os-installation--directory-layouts)
 - [📖 Command Reference](#-command-reference)
   - [1. Stack Lifecycle Orchestration (`tmctl stack`)](#1-stack-lifecycle-orchestration-tmctl-stack)
-  - [2. Autonomous Diagnostic Rulepack Management (`tmctl rules`)](#2-autonomous-diagnostic-rulepack-management-tmctl-rules)
-  - [3. Enterprise Container Registry Authentication (`tmctl registry`)](#3-enterprise-container-registry-authentication-tmctl-registry)
-  - [4. Platform Governance & Compliance Validation (`tmctl validate`)](#4-platform-governance--compliance-validation-tmctl-validate)
-  - [5. Version Information (`tmctl version`)](#5-version-information-tmctl-version)
+  - [2. Host Telemetry Daemon & Event Spooling (`tmctl agent`)](#2-host-telemetry-daemon--event-spooling-tmctl-agent)
+  - [3. Autonomous Diagnostic Rulepack Management (`tmctl rules`)](#3-autonomous-diagnostic-rulepack-management-tmctl-rules)
+  - [4. Incident Crash Triage & Alert Verification (`tmctl diagnostic`)](#4-incident-crash-triage--alert-verification-tmctl-diagnostic)
+  - [5. Autonomous Pull-Based GitOps Engine (`tmctl gitops`)](#5-autonomous-pull-based-gitops-engine-tmctl-gitops)
+  - [6. Embedded REST API Daemon (`tmctl serve`)](#6-embedded-rest-api-daemon-tmctl-serve)
+  - [7. Enterprise Container Registry Authentication (`tmctl registry`)](#7-enterprise-container-registry-authentication-tmctl-registry)
+  - [8. Platform Governance & Compliance Validation (`tmctl validate`)](#8-platform-governance--compliance-validation-tmctl-validate)
+  - [9. Version Information (`tmctl version`)](#9-version-information-tmctl-version)
 - [🧪 Multi-OS Verification & Test Evidence](#-multi-os-verification--test-evidence)
 - [📂 Repository Structure](#-repository-structure)
 - [📄 License, Ownership & Disclaimer](#-license-ownership--disclaimer)
@@ -46,44 +50,45 @@
 
 1. **Direct Socket REST API Engine Communication (Zero CLI Subprocess):** Bypasses `docker` and `podman` CLI subprocess execution. Communicates directly over Unix Domain Sockets (`/run/user/.../podman.sock` or `/var/run/docker.sock`) and Windows Named Pipes (`\\.\pipe\docker_engine`), receiving deterministic, structured JSON payloads.
 2. **Stateful Snapshot & Automated Safe Rollback:** Before replacing any running workload, `tmctl` stops and renames the current container into a rollback snapshot (`<name>-rollback-snapshot`). If post-deployment readiness checks fail, `tmctl` automatically restores the snapshot to prevent service outages.
-3. **Active Health & Readiness Probing:** Automatically polls synthetic health endpoints (`/metrics`, `/health`, `/-/ready`) over HTTPS/HTTP or probes raw TCP ports before declaring container deployments healthy.
-4. **Two-Tier Storage Governance:** Coordinates high-performance Engine Named Volumes (TSDB Prometheus data, SQLite diagnostic database, Tomcat logs) with host workspaces (`/opt/tm-home` on Linux, `C:\tm-home` on Windows) for configurations, bearer tokens, and TLS credentials.
-5. **Runtime Diagnostic Rulepack Ingestion & Export:** Ingests single or batch AI diagnostic rules (`.json` or stdin) into the Diagnostic Service at runtime with zero container restarts, and exports live rules filtered by failure-domain category (`--category`).
-6. **Isolated Container Registry Credential Management:** Authenticates against private enterprise OCI registries using dedicated, isolated authfiles (`--auth-file`), preventing unintended contamination of the host's global Docker configuration.
-7. **Static Platform Contract & Secret Leak Audit:** Audits repository layouts against platform specifications (`CONFIG`, `README.md`, `AGENTS.md`), checks JSON schema syntax validity, and strictly blocks forbidden sensitive materials (`.pem`, `.key`, `.p12`, `.pfx`, `.jks`, `.keystore`, `.env`).
-8. **100% Symmetrical Multi-OS Support:** Compiled with `CGO_ENABLED=0` to run identically on Linux (`amd64`, `arm64`) and Windows Server 2019/2022/2025 (`tmctl.exe`) with zero external runtime dependencies (no Python, Node.js, or Bash needed on target hosts).
+3. **Integrated Host Telemetry & Event Collector (`tmctl agent`):** Directly listens to container lifecycle events (`died`, `oom`, `restart`), captures container exit codes and crash state, and records atomic JSON evidence records with strict retention pruning—completely eliminating standalone collector daemons.
+4. **Autonomous Pull-Based GitOps Reconciler (`tmctl gitops`):** Clones and polls declarative `monitoring-spec.yaml` manifests via Gitea/GitHub REST API, detects live runtime drift, and reconciles state automatically via OS schedulers (`systemd --user timer` on Linux, Task Scheduler on Windows). Zero Ansible controller and zero open SSH ports needed.
+5. **Deterministic Crash Triage & Alert Pipeline Probe (`tmctl diagnostic`):** Performs automated heuristic triage on container crash records and dispatches synthetic alerts through Alertmanager/Postfix to verify the full alert pipeline end-to-end.
+6. **Embedded REST API Daemon (`tmctl serve`):** Exposes an embedded, authenticated HTTP API for Self-Service Portal integration, dashboards, and automated remote triggering.
+7. **Runtime Diagnostic Rulepack Ingestion & Export:** Ingests single or batch AI diagnostic rules (`.json` or stdin) into the Diagnostic Service at runtime with zero container restarts, and exports live rules filtered by failure-domain category (`--category`).
+8. **100% Symmetrical Multi-OS Support:** Compiled with `CGO_ENABLED=0` to run identically on Linux (`amd64`, `arm64`) and Windows Server 2019/2022/2025 (`tmctl.exe`) with zero external runtime dependencies.
 
 ---
 
-## 🏛️ Architecture: The 4 Operational Pillars
+## 🏛️ Architecture: The 6 Operational Pillars
 
 ```mermaid
 flowchart TD
-    subgraph OPERATOR["Operator / CI/CD Runner (Linux / Windows)"]
-        CLI["tmctl / tmctl.exe"]
+    subgraph OPERATOR["tmctl: The Super Monitoring Operator"]
+        STACK["tmctl stack (Container Lifecycle)"]
+        AGENT["tmctl agent (Host Telemetry & Spool)"]
+        GITOPS["tmctl gitops (Pull Reconciler)"]
+        RULES["tmctl rules (AI Rulepacks)"]
+        DIAG["tmctl diagnostic (Triage & Alert Probe)"]
+        SERVE["tmctl serve (REST API Daemon)"]
     end
 
     subgraph ENGINE["Container Engine Socket Layer"]
         SOCK["Unix Domain Socket / Windows Named Pipe"]
-        API["REST Engine API (/containers, /volumes, /networks)"]
+        API["REST Engine API (/containers, /events, /volumes)"]
     end
 
     subgraph FLEET["Tomcat Monitoring & Diagnostic Fleet"]
         JMX["tomcat-jmx-exporter (:8083, :9404)"]
         PROM["prometheus (:9090)"]
         AM["alertmanager (:9093)"]
-        DIAG["diagnostic-service (:8443)"]
-        MAIL["mailpit (:8025, :1025) & postfix (:587)"]
+        DIAG_SVC["diagnostic-service (:8443)"]
+        MAIL["mailpit & postfix-relay (:587)"]
     end
 
-    subgraph STORAGE["Two-Tier Storage Architecture"]
-        T1["Tier 1: Engine Named Volumes (High I/O TSDB & Logs)"]
-        T2["Tier 2: Host Workspace (Config, Secrets, TLS Certs)"]
-    end
-
-    CLI ==>|Direct HTTP via Socket| SOCK ==> API
+    OPERATOR ==>|Direct REST API via Socket| SOCK ==> API
     API --> FLEET
-    FLEET -.-> STORAGE
+    AGENT -->|Listen Events| API
+    GITOPS -->|Autonomous Reconciliation| STACK
 ```
 
 ### Pillar 1: Direct Socket API & Engine Duality
@@ -273,7 +278,21 @@ Postfix Enterprise SMTP Relay  postfix-relay        localhost/postfix-relay:late
 
 ---
 
-#### C. Clean Fleet Workloads (`tmctl stack clean`)
+#### C. Restart Fleet Workloads (`tmctl stack restart`)
+Restarts workloads gracefully with active readiness probing.
+
+```bash
+# Restart all monitoring workloads
+tmctl stack restart
+
+# Restart specific workload
+tmctl stack restart --target diagnostic
+tmctl stack restart --target prometheus
+```
+
+---
+
+#### D. Clean Fleet Workloads (`tmctl stack clean`)
 Stops and removes fleet containers cleanly without affecting persistent data volumes unless explicitly instructed.
 
 ```bash
@@ -286,7 +305,39 @@ tmctl stack clean --all
 
 ---
 
-### 2. Autonomous Diagnostic Rulepack Management (`tmctl rules`)
+### 2. Host Telemetry Daemon & Event Spooling (`tmctl agent`)
+Directly integrates container event streaming, crash detection, and evidence record spooling into `tmctl`, eliminating external collector scripts.
+
+#### A. Run Telemetry Collector Daemon (`tmctl agent run`)
+```bash
+# Run telemetry daemon listening to live container socket events (died, oom, restart)
+tmctl agent run --target tomcat-jmx-exporter --spool-dir /opt/tm-home/spool
+
+# Execute single snapshot and retention prune cycle, then exit (ideal for CI)
+tmctl agent run --run-once
+```
+
+#### B. Register Agent as Background OS Service (`tmctl agent install`)
+Registers `tmctl agent` as a persistent background daemon:
+- **Linux:** Registers and activates `systemd --user` unit (`tmctl-agent.service`).
+- **Windows:** Registers native Windows Service (`TomcatMonitoringAgent`).
+
+```bash
+tmctl agent install --target tomcat-jmx-exporter --spool-dir /opt/tm-home/spool
+```
+
+#### C. Inspect Agent & Spool Storage Status (`tmctl agent status` & `tmctl agent spool`)
+```bash
+# Inspect agent service state and spool metrics
+tmctl agent status
+
+# Enforce retention pruning manually (purges stale .tmp, expired .json, and limits quota)
+tmctl agent spool --prune --max-age 24 --max-files 1000
+```
+
+---
+
+### 3. Autonomous Diagnostic Rulepack Management (`tmctl rules`)
 Interacts directly with the Tomcat Diagnostic Service REST API (`/api/v1/rules`) to manage AI-assisted incident diagnostic rules at runtime.
 
 #### A. Ingest Rulepacks (`tmctl rules ingest`)
@@ -355,7 +406,130 @@ Total Rules      : 9
 
 ---
 
-### 3. Enterprise Container Registry Authentication (`tmctl registry`)
+#### C. Audit Rulepack Syntax (`tmctl rules audit`)
+```bash
+tmctl rules audit config/rules/custom-rulepack.json
+```
+
+---
+
+### 4. Incident Crash Triage & Alert Verification (`tmctl diagnostic`)
+Executes deterministic crash evaluations and verifies notification dispatching.
+
+#### A. Execute Automated Crash Triage (`tmctl diagnostic triage`)
+Correlates container runtime exit codes, Cgroup OOM killer indicators, and persistent spool records to provide instant root-cause analysis and remediation steps.
+
+```bash
+# Execute triage on target workload
+tmctl diagnostic triage --container tomcat-jmx-exporter
+
+# Export triage post-mortem report to JSON
+tmctl diagnostic triage --container tomcat-jmx-exporter --json-out /tmp/triage-report.json
+```
+
+**Sample Output:**
+```text
+========================================================
+ Executing Tomcat Diagnostic & Crash Triage
+========================================================
+
+ℹ INFO: Target Container : tomcat-jmx-exporter
+ℹ INFO: Spool Directory  : /opt/tm-home/spool
+ℹ INFO: Container State  : exited
+ℹ INFO: Exit Code        : 137
+ℹ INFO: OOM Killed       : true
+✖ ERROR: Triage Diagnosis : [CRITICAL] Container terminated by OS Cgroup Out-Of-Memory (OOM) Killer (Exit Code 137).
+ℹ INFO: Remediation Plan :
+  • Increase container memory limit (--memory or spec.stack.memoryLimit)
+  • Adjust JVM maximum heap size (-Xmx) to allow at least 25% headroom for native memory / metaspace
+  • Check Tomcat catalina.out for Java OutOfMemoryError: Java heap space
+ℹ INFO: Correlated Evidence Files (2): 17904060_runtime_oom.json, 17904060_container_state.json
+```
+
+---
+
+#### B. Dispatch Synthetic Verification Alert (`tmctl diagnostic test-alert`)
+Validates that Alertmanager routing, template rendering, and Postfix SMTP relay dispatching function seamlessly.
+
+```bash
+tmctl diagnostic test-alert --recipient sre-oncall@corp.internal
+```
+
+---
+
+### 5. Autonomous Pull-Based GitOps Engine (`tmctl gitops`)
+Enables zero-touch, declarative GitOps management for the entire monitoring ecosystem without requiring Ansible controllers or open SSH ports.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Timer as OS Timer (systemd / Task Scheduler)
+    participant Reconciler as tmctl gitops sync
+    participant Git as Gitea / GitHub REST API
+    participant Engine as Container Engine Socket
+    participant Rules as Diagnostic Service
+
+    Timer->>Reconciler: Trigger scheduled sync (every 5m)
+    Reconciler->>Git: Poll latest commit SHA & monitoring-spec.yaml
+    alt Drift Detected or Commit Progressed
+        Reconciler->>Engine: Reconcile Containers (Rolling Update)
+        Reconciler->>Rules: Ingest Updated AI Rulepack
+        Reconciler->>Reconciler: Update state.json
+    else No Drift
+        Reconciler-->>Timer: In-Sync (Exit 0)
+    end
+```
+
+#### A. Initialize GitOps Environment (`tmctl gitops init`)
+Configures the local repository binding, downloads the initial spec via REST API, and activates native OS timers.
+
+```bash
+# Initialize with remote Git repository and enable autonomous systemd/Windows timer
+tmctl gitops init --repo http://gitea.corp:3000/gitadm/tomcat-monitoring-gitops.git --timer
+
+# Custom reconciliation interval (e.g. every 2 minutes)
+tmctl gitops init --repo http://gitea.corp:3000/gitadm/tomcat-monitoring-gitops.git --interval 2min --timer
+```
+
+#### B. Execute Autonomous Sync (`tmctl gitops sync`)
+```bash
+# Reconcile live runtime against monitoring-spec.yaml
+tmctl gitops sync --spec monitoring-spec.yaml
+
+# Dry-run evaluation (detect drift without applying changes)
+tmctl gitops sync --dry-run
+
+# Force reconciliation regardless of commit SHA
+tmctl gitops sync --force
+```
+
+#### C. Inspect GitOps Synchronization Status (`tmctl gitops status`)
+```bash
+tmctl gitops status
+tmctl gitops status --json-out /tmp/gitops-status.json
+```
+
+---
+
+### 6. Embedded REST API Daemon (`tmctl serve`)
+Runs a lightweight, embedded HTTP REST server for Self-Service Portal integration and centralized orchestration dashboards.
+
+```bash
+# Start API daemon on port 8099 with API key protection
+tmctl serve --port 8099 --api-key "SecretOperatorToken" --host 0.0.0.0
+```
+
+**Available API Endpoints:**
+* `GET  /healthz` — Service health check
+* `GET  /api/v1/stack/status` — Live container statuses
+* `GET  /api/v1/agent/status` — Host agent & spool metrics
+* `POST /api/v1/gitops/sync` — Trigger immediate GitOps reconciliation
+* `GET  /api/v1/gitops/status` — Inspect GitOps commit, timer, and sync state
+* `POST /api/v1/diagnostic/triage` — Trigger on-demand crash evaluation
+
+---
+
+### 7. Enterprise Container Registry Authentication (`tmctl registry`)
 Manages authentication against private enterprise container registries (e.g. Harbor, JFrog, Quay) using isolated credential authfiles.
 
 ```bash
@@ -373,7 +547,7 @@ tmctl registry logout registry.internal.corp:5000 --auth-file /opt/tm-home/confi
 
 ---
 
-### 4. Platform Governance & Compliance Validation (`tmctl validate`)
+### 8. Platform Governance & Compliance Validation (`tmctl validate`)
 Executes pre-flight static compliance audits across repository layout, contract specifications, JSON schemas, and secret leak prevention.
 
 ```bash
@@ -395,7 +569,7 @@ tmctl validate --schemas
 
 ---
 
-### 5. Version Information (`tmctl version`)
+### 9. Version Information (`tmctl version`)
 
 Displays compiled binary release version, git commit hash, build timestamp, target operating system, and target architecture.
 
@@ -468,20 +642,42 @@ tmctl/
 │   └── tmctl/
 │       └── main.go            Main CLI entrypoint and subcommand dispatchers
 ├── internal/
+│   ├── agent/                 Integrated host telemetry collector & spooling daemon
+│   │   ├── collector.go       Socket lifecycle event listener and crash recorder
+│   │   ├── mgmt.go            OS service installer (systemd / Windows Service) & status
+│   │   ├── record.go          Canonical schema models (event-record-v1)
+│   │   ├── retention.go       Autonomous spool retention and FIFO quota pruning
+│   │   ├── service_unix.go    Unix signal service runner
+│   │   ├── service_windows.go Windows SCM service runner
+│   │   └── writer.go          Atomic spool evidence writer (.tmp -> .json with 0600)
+│   ├── api/                   Embedded lightweight REST API daemon for Portal integration
+│   │   ├── middleware.go      Auth, CORS, and request logging middleware
+│   │   └── server.go          Route handlers for stack, agent, gitops, and triage
 │   ├── buildinfo/             Build metadata and git commit stamping
 │   ├── config/                Configuration parser and environment resolver
+│   ├── diagnostic/            Deterministic crash triage and alert pipeline testing
+│   │   ├── alert.go           Synthetic alert probe dispatcher
+│   │   └── triage.go          Cgroup OOM and crash exit-code heuristic analyzer
 │   ├── engine/                Container engine socket abstraction layer
-│   │   ├── client.go          Engine client interface and socket detection
+│   │   ├── client.go          Engine client interface, events streaming & socket detection
 │   │   ├── engine_adapter.go  REST API implementation over sockets
 │   │   ├── socket_unix.go     Unix domain socket dialer (Linux)
 │   │   ├── socket_windows.go  Named pipe dialer (Windows)
 │   │   └── types.go           Container, Volume, and Network data types
+│   ├── gitops/                Autonomous pull-based GitOps reconciliation engine
+│   │   ├── client.go          Gitea / GitHub REST API manifest and commit poller
+│   │   ├── init.go            GitOps directory & starter spec initializer
+│   │   ├── models.go          Declarative monitoring-spec.yaml data structures
+│   │   ├── state.go           Reconciliation history and state.json manager
+│   │   ├── status.go          Sync state, drift detection, and timer inspector
+│   │   ├── sync.go            Autonomous drift detection & state reconciler
+│   │   └── systemd.go         Native OS scheduler (systemd timer & Windows Task)
 │   ├── orchestrator/          Container stack deploy, status, and clean handlers
+│   │   ├── cleaner.go         Workload and volume cleanup handlers
 │   │   ├── deployer.go        Atomic 5-step rolling deployment coordinator
 │   │   ├── readiness.go       Synthetic HTTP/HTTPS and TCP readiness probes
 │   │   ├── specs.go           Container workload specifications and volume bindings
-│   │   ├── status.go          Container inspection and console table renderer
-│   │   └── cleaner.go         Workload and volume cleanup handlers
+│   │   └── status.go          Container inspection and console table renderer
 │   ├── registry/              Container registry login and token isolation
 │   ├── rules/                 Declarative rulepack ingestion and export client
 │   └── validator/             Static repository and JSON schema validator

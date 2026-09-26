@@ -124,3 +124,47 @@ type EngineInfo struct {
 	OSType     string
 	SocketPath string
 }
+
+// EventActor represents event actor details in Docker/Podman events.
+type EventActor struct {
+	ID         string            `json:"ID"`
+	Attributes map[string]string `json:"Attributes"`
+}
+
+// EventMessage represents a raw event payload streamed from the container engine.
+type EventMessage struct {
+	Type     string     `json:"Type"`
+	Action   string     `json:"Action"`
+	Status   string     `json:"status,omitempty"`
+	Actor    EventActor `json:"Actor"`
+	ID       string     `json:"id,omitempty"`
+	From     string     `json:"from,omitempty"`
+	Time     int64      `json:"time"`
+	TimeNano int64      `json:"timeNano"`
+	Name     string     `json:"Name,omitempty"`
+}
+
+// GetAction returns normalized action string (e.g. "die", "stop", "oom", "start").
+func (e *EventMessage) GetAction() string {
+	if e.Action != "" {
+		return e.Action
+	}
+	if e.Status != "" {
+		return e.Status
+	}
+	return ""
+}
+
+// GetContainerName returns container name from Attributes or Name field.
+func (e *EventMessage) GetContainerName() string {
+	if e.Actor.Attributes != nil {
+		if name, ok := e.Actor.Attributes["name"]; ok && name != "" {
+			return name
+		}
+	}
+	if e.Name != "" {
+		return e.Name
+	}
+	return ""
+}
+

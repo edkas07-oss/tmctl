@@ -30,6 +30,7 @@ type EngineClient interface {
 	RemoveNetwork(ctx context.Context, nameOrID string) error
 
 	InspectImage(ctx context.Context, imageName string) (bool, error)
+	StreamEvents(ctx context.Context, targetContainer string) (<-chan EventMessage, <-chan error)
 	GetInfo() *EngineInfo
 }
 
