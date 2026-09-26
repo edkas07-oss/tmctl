@@ -42,20 +42,25 @@ This guide provides comprehensive instructions for building, installing, configu
 
 ---
 
-## 2. Quick Start Compilation (Native Binary)
-
-To build the static binary for the current host architecture:
+## 2. Quick Start Compilation
 
 ```bash
-# 1. Clone repository
-git clone git@github.com:edkas07-oss/tmctl.git
+# 1. Clone repository from GitHub
+git clone https://github.com/edkas07-oss/tmctl.git
 cd tmctl
 
-# 2. Build native static binary
-make build
+# 2. Compile binaries
+# Compile for host platform (Linux amd64 ELF)
+make build-linux
+
+# Cross-compile for Windows (Windows amd64 PE exe)
+make build-windows
+
+# Or build both simultaneously
+make build-all
 ```
 
-The compiled binary will be placed at `bin/tmctl` (Linux) or `bin/tmctl.exe` (Windows).
+The compiled binaries are generated in `bin/tmctl` (Linux) and `bin/tmctl.exe` (Windows).
 
 > [!NOTE]
 > `tmctl` is compiled with `CGO_ENABLED=0` and stripped symbols (`-s -w`), producing a single, self-contained static binary with zero external runtime dependencies.
@@ -78,9 +83,14 @@ tmctl version
 On Windows Server (PowerShell):
 ```powershell
 # Copy binary to system path or home workspace
-New-Item -ItemType Directory -Force -Path C:\tm-home\bin
-Copy-Item .\bin\windows_amd64\tmctl.exe C:\tm-home\bin\tmctl.exe
-[Environment]::SetEnvironmentVariable("Path", $env:Path + ";C:\tm-home\bin", "User")
+New-Item -ItemType Directory -Force -Path "C:\Program Files\tmctl"
+Copy-Item .\bin\tmctl.exe "C:\Program Files\tmctl\tmctl.exe" -Force
+$CurrentPath = [Environment]::GetEnvironmentVariable("Path", "Machine")
+if ($CurrentPath -notlike "*C:\Program Files\tmctl*") {
+    [Environment]::SetEnvironmentVariable("Path", "$CurrentPath;C:\Program Files\tmctl", "Machine")
+    $env:Path += ";C:\Program Files\tmctl"
+}
+tmctl version
 ```
 
 ---
@@ -97,10 +107,8 @@ make build-all
 
 | Output Binary | Target Architecture | Format | Size | Target Environment |
 | :--- | :--- | :--- | :---: | :--- |
-| `bin/linux_amd64/tmctl` | `linux/amd64` | ELF 64-bit Static | ~5.7 MB | Linux Server (x86_64), CI Runners |
-| `bin/linux_arm64/tmctl` | `linux/arm64` | ELF 64-bit Static | ~5.5 MB | AWS Graviton, ARM64 Edge Nodes |
-| `bin/windows_amd64/tmctl.exe` | `windows/amd64` | PE32+ Executable | ~5.9 MB | Windows Server 2019/2022/2025 |
-| `bin/checksums.txt` | All | SHA-256 Manifest | - | Cryptographic Integrity Checksums |
+| `bin/tmctl` | `linux/amd64` | ELF 64-bit Static | ~5.7 MB | Linux Server (x86_64), CI Runners |
+| `bin/tmctl.exe` | `windows/amd64` | PE32+ Executable | ~5.9 MB | Windows Server 2019/2022/2025 |
 
 ---
 
